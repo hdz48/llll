@@ -1,0 +1,27 @@
+#include <iostream>
+using namespace std;
+int m(int x)
+{
+	int y;
+	if (x >= 1000 && x < 5000)
+	{
+		y = x * 0.05;
+	}
+	if (x >= 5000 && x < 10000)
+	{
+		y = x * 0.08;
+	}
+	if (x >= 10000)
+	{
+		y = x * 0.1;
+	}
+	return y;
+}
+int main()
+{
+	int x;
+	cin >> x;
+
+	cout << m(x);
+	return 0;
+}
