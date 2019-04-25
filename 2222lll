@@ -1,0 +1,133 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+#include<windows.h>
+#include<time.h>
+struct node
+{
+    int x,y;
+}s[10000];
+int len = 0,sok=1,easy=1;
+char body[2] = "@",food[2] = "$",space[2] = " ";
+char name[100];
+void printfXy(short x,short y, char c[100])
+{
+    COORD pos = {x,y};
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorPosition(hOut, pos);
+    printf("%s",c);
+}
+void mainshow()
+{
+    char words1[20] = "请选择游戏模式：",words2[20] = "1、简单模式",words3[20] = "2、一般模式",
+    words4[20] = "3、困难模式",words5[30]="请输入模式前对应编号：",words6[20]="贪吃蛇",
+    tips[30]="游戏即将开始。。请稍后。。",user[20] = "请输入你的名字：";;
+    printfXy(44,3,words6);
+    printfXy(40,5,words1);
+    printfXy(40,6,words2);
+    printfXy(40,7,words3);
+    printfXy(40,8,words4);
+    printfXy(40,9,words5);
+    scanf("%d",&easy);
+    easy = (4-easy)*100;
+    system("cls");
+    printfXy(40,5,user);
+    scanf("%s",name);
+    printfXy(40,5,tips);
+    Sleep(2000);
+    system("cls");
+}
+void printfFen(short x,short y,int fen,char s[100])
+{
+    COORD pos = {x,y};
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorPosition(hOut, pos);
+    printf("%s %d",s,fen);
+}
+void createRole(int *sx,int *sy)
+{
+    srand((unsigned)time(NULL));
+    *sx = rand()%100+2,*sy = rand()%20+2;
+    printfXy(*sx,*sy,food);
+}
+int checkFanWei(int *x,int *y,FILE *fp,int maxfen)
+{
+    int maxX = 120,maxY = 40;
+
+    if(*x>maxX||*x<0||*y<0||*y>maxY)
+    {
+        if(maxfen<=(len-1)*3)
+        {
+            fclose(fp);
+            FILE *fp2;
+            fp2 = fopen("game.txt","w");
+            fprintf(fp2,"%d\n",(len-1)*3);
+            fclose(fp2);
+        }
+        system("cls");
+        printf("%s 死了吧！！哈哈哈哈！！3秒后继续。。。。。。。%d",name,maxfen);
+        len = 1,s[0].x = 50,s[0].y = 20,sok = 1;;
+        Sleep(3000);
+        system("cls");
+        return 0;
+    }
+    return 1;
+}
+int main()
+{
+    system("color 2");
+    mainshow();
+    FILE *fp;
+    char maxf[20],wm[100] = "你的最高得分为：",w[100] = "你的得分为：";
+    int maxfen = 0,ch,sx,sy,qx,qy;
+    fp = fopen("game.txt","a+");
+    fgets(maxf,10,fp);
+    maxfen = atoi(maxf);
+    system("mode con cols=120 lines=40");
+    s[len].x = 50,s[len++].y = 20;
+    while(true)
+    {
+        printfFen(50,0,maxfen,wm);
+        printfXy(s[0].x,s[0].y,body);
+        if(sok)
+        {
+            createRole(&sx,&sy);
+            sok =0;
+        }
+        printfFen(25,0,(len-1)*3,w);
+        Sleep(easy);
+        if(kbhit())
+        {
+            getch();
+            loop:if(kbhit()) ch = getch();
+            if(ch!=72&&ch!=80&&ch!=75&&ch!=77)
+                goto loop;
+        }
+        printfXy(s[len-1].x,s[len-1].y,space);
+        if(checkFanWei(&s[0].x,&s[0].y,fp,maxfen))
+        {
+            fp = fopen("game.txt","a+");
+            fgets(maxf,100,fp);
+            maxfen = atoi(maxf);
+        }
+        qx = s[0].x,qy = s[0].y;
+        switch(ch)
+        {
+            case 72:s[0].y--;  break;//向上
+            case 80:s[0].y++;  break;//向下
+            case 75:s[0].x--;  break;//向左
+            case 77:s[0].x++;  break;//向右
+        }
+        if(s[0].x==sx&&s[0].y==sy)//判断是否吃到食物
+        {
+            len++,sok = 1;
+            if(easy>=100)//吃到食物后加速
+                easy -= 1;
+        }
+        for(int i=len-1;i>1;i--)//移动后后一个节点等于前一个节点的位置
+        {
+            s[i] = s[i-1];
+        }
+        s[1].x=qx,s[1].y=qy;
+    }
+}
